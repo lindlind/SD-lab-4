@@ -1,30 +1,31 @@
 package utils;
 
 import exceptions.UnavailableException;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 public class UrlReader {
 
     public String readFromUrl(String stringUrl) {
-        final URL url;
+        final URI uri;
         try {
-            url = new URL(stringUrl);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("Failed to parse url");
+            uri = new URI(stringUrl);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Failed to parse uri");
         }
-        try (final BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
-            String inputLine;
-            final StringBuilder content = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-            return content.toString();
+        final HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
+        final HttpResponse<String> response;
+        try{
+            response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            return response.body();
         } catch (IOException e) {
             throw new UnavailableException("Failed to connect to stock market");
+        } catch (InterruptedException e) {
+            throw new IllegalStateException("Interrupted", e);
         }
     }
 

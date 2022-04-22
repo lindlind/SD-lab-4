@@ -16,7 +16,7 @@ public class Server {
     private final JsonMapper jsonMapper;
 
     public Server(int port, MarketService marketService, AdminService adminService) throws IOException {
-        this.server = HttpServer.create(new InetSocketAddress("localhost", port), 0);
+        this.server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
         this.jsonMapper = new JsonMapper();
 
         server.createContext("/stocks", new HttpHandlerImpl(uri -> {
